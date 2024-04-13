@@ -1,0 +1,17 @@
+#mainDiv {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(199, 255, 204);
+    border: 1px solid white;
+    width: 100%;
+    text-decoration: none;
+    color: black;
+}
+
+.detDiv {
+    text-align: center;
+    height: 100%;
+    padding: 10px;
+    text-decoration: none;
+}
