@@ -2,23 +2,33 @@
 import { useSearchParams } from "next/navigation"
 import './viewDet.css'
 import CheckEligibility from '@/Components/CheckEligibility/CheckEligibility'
-import { useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 
 function viewDetails() {
   console.log('View Details Component')
   const searchParams = useSearchParams()
-  const userdata = {
-    userId : searchParams.get('userId'),
-    name : searchParams.get('username'),
-    age : searchParams.get('userAge'),
-    description : searchParams.get('userDesc'),
-    createdDate : searchParams.get('userDate'),
-    status : searchParams.get('userStatus')
-  }
   const id = searchParams.get('userId')
+  const [data,setData] = useState({})
   const eligbRef = useRef()
 
-  const handleClick = ()=>{
+  const fetchData = async () => {
+    try {
+      const response = await fetch('/data.json'); // Assuming data.json is in the public directory
+      if (!response.ok) {
+        throw new Error('Failed to fetch data');
+      }
+      const jsonData = await response.json();
+      setData(jsonData.data.find(item => item.id == id));
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  }
+
+  useEffect(()=>{
+    fetchData();
+  },[])
+
+  const handleClick = () => {
     eligbRef.current.checkEligible()
   }
 
@@ -26,20 +36,20 @@ function viewDetails() {
     <div style={{ padding: '20px' }}>
       <h1>First-Task</h1>
       <div id="detDiv">
-        <h2>{userdata.name}</h2>
-        <p><b><i>"{userdata.description}"</i></b></p>
+        <h2>{data.name}</h2>
+        <p><b><i>"{data.description}"</i></b></p>
         <p>
-          <span style={{ marginRight: "50px" }}>Created At : <b>{userdata.createdDate}</b></span>
+          <span style={{ marginRight: "50px" }}>Created At : <b>{data.createdAt}</b></span>
           {
-            userdata.status == 'Online' ?
-              <span style={{ color: "green" }}>Status : <b>{userdata.status}</b></span> :
-              <span style={{ color: "red" }}>Status : <b>{userdata.status}</b></span>
+            data.status == 'Online' ?
+              <span style={{ color: "green" }}>Status : <b>{data.status}</b></span> :
+              <span style={{ color: "red" }}>Status : <b>{data.status}</b></span>
           }
         </p>
-        <div style={{display:"flex", justifyContent:"center", marginTop:"30px"}}>
-          <button style={{ backgroundColor: "green" }} onClick={handleClick}>Check Eligibility</button>
+        <div style={{ display: "flex", justifyContent: "center", marginTop: "30px" }}>
+          <button style={{ backgroundColor: "green", width:"130px" }} onClick={handleClick}>Check Eligibility</button>
         </div>
-        <CheckEligibility data={userdata} ref={eligbRef} />
+        <CheckEligibility data={data} ref={eligbRef} />
       </div>
     </div>
   )

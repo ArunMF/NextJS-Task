@@ -1,19 +1,37 @@
 'use client'
-import React, { useCallback, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import DataRow from '@/Components/DataRow/DataRow'
 import DataLength from '@/Components/DataLength/DataLength'
 import ChildComp from '@/Components/ChildComp/ChildComp'
-import data from '@/app/data.json'
-import './allDet.css'
+import './userDetails.css'
 function allDetails() {
 
     console.log('All Data Component');
-    const [allData, setAllData] = useState(data.data)
+    const [allData, setAllData] = useState([])
+    const [onlineData, setOnlineData] = useState([])
+    const [offlineData, setOfflineData] = useState([])
     const [checkValue, setValue] = useState('')
 
-    const onlineData = (data.data).filter(item => item.status == 'Online');
-    const offlineData = (data.data).filter(item => item.status == 'Offline');
+    const fetchData = async() =>{
+        try {
+            const response = await fetch('/data.json'); // Assuming data.json is in the public directory
+            if (!response.ok) {
+              throw new Error('Failed to fetch data');
+            }
+            const jsonData = await response.json();
+            console.log(jsonData);
+            setAllData(jsonData.data);
+            setOnlineData((jsonData.data).filter(item => item.status == 'Online'))
+            setOfflineData((jsonData.data).filter(item => item.status == 'Offline'))
+          } catch (error) {
+            console.error('Error fetching data:', error);
+          }
+    }
+
+    useEffect(()=>{
+        fetchData();
+    },[])
 
     function checking() {
         setValue('checked.')
@@ -26,7 +44,7 @@ function allDetails() {
 
     const changeData = useCallback((value) => {
         if (value == 'Online') {
-            setAllData((data.data).filter(item => item.status == 'Online'));
+            setAllData(onlineData);
         } else if (value == 'Offline') {
             setAllData(offlineData)
         } 
@@ -35,8 +53,6 @@ function allDetails() {
 
     return (
         <div>
-            <div style={{ padding: '20px' }}>
-                <h1>First-Task</h1>
                 <div>
                     <h2 style={{ textAlign: "center" }}>All user details</h2>
                     <div style={{ display: "flex", justifyContent: "end" }}>
@@ -63,12 +79,7 @@ function allDetails() {
                                     <Link key={item.id} href={{
                                         pathname: '/viewDetails',
                                         query: {
-                                            userId: item.id,
-                                            username: item.name,
-                                            userAge: item.age,
-                                            userDesc: item.description,
-                                            userStatus: item.status,
-                                            userDate: item.createdAt
+                                            userId: item.id
                                         }
                                     }} style={{ textDecoration: "none", margin:"10px" }}>
                                         <DataRow itemdata={item} />
@@ -77,7 +88,6 @@ function allDetails() {
                         }
                     </div>
                 </div>
-            </div>
         </div>
     )
 }
